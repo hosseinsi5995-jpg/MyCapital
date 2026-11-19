@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090d16" />
+  <title>MyCapital | مدیریت سرمایه</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <div id="introSplash" class="intro-splash" aria-label="MyCapital">
+    <div class="intro-grid"></div>
+    <div class="intro-orbit orbit-a"></div>
+    <div class="intro-orbit orbit-b"></div>
+    <div class="intro-content">
+      <div class="intro-logo-wrap">
+        <div class="intro-logo"><span>M</span><i>C</i></div>
+        <div class="logo-ring ring-one"></div>
+        <div class="logo-ring ring-two"></div>
+        <div class="logo-spark spark-one"></div>
+        <div class="logo-spark spark-two"></div>
+      </div>
+      <div class="intro-kicker">PERSONAL CAPITAL MANAGER</div>
+      <div class="intro-title">My<span>Capital</span></div>
+      <div class="intro-line"><i></i></div>
+      <div class="intro-credit">ساخته‌ی <strong>حسین اراده</strong></div>
+      <div class="intro-loading"><span></span></div>
+    </div>
+    <div class="intro-corner intro-corner-left">MC / 01</div>
+    <div class="intro-corner intro-corner-right">PRIVATE FINANCE</div>
+  </div>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <main id="authView" class="auth-shell">
+    <section class="auth-card glass">
+      <div class="brand-mark">M<span>C</span></div>
+      <p class="eyebrow">PERSONAL CAPITAL MANAGER</p>
+      <h1>مدیریت سرمایه، <span>هوشمندتر.</span></h1>
+      <p class="muted">برای ورود یا ساخت حساب کاربری اطلاعاتت را وارد کن.</p>
+      <div class="auth-tabs">
+        <button class="tab active" id="loginTab">ورود</button>
+        <button class="tab" id="signupTab">ثبت‌نام</button>
+      </div>
+      <form id="authForm">
+        <label>ایمیل</label><input id="email" type="email" placeholder="name@example.com" required autocomplete="email">
+        <label>رمز عبور</label><input id="password" type="password" placeholder="حداقل ۶ کاراکتر" required minlength="6" autocomplete="current-password">
+        <button class="primary-btn full" id="authSubmit">ورود به داشبورد <span>↗</span></button>
+      </form>
+      <p class="auth-note" id="authMessage">اطلاعات هر کاربر به‌صورت جداگانه و امن ذخیره می‌شود.</p>
+    </section>
+  </main>
+
+  <div id="appView" class="app-shell hidden">
+    <aside class="sidebar glass">
+      <div class="brand"><div class="brand-mark small">M<span>C</span></div><div><b>MyCapital</b><small>CAPITAL CONTROL</small></div></div>
+      <div class="profile"><div class="avatar" id="avatar">U</div><div><b id="userEmail">کاربر</b><small>حساب شخصی</small></div><span class="online-dot"></span></div>
+      <p class="nav-caption">فضای کاری</p>
+      <nav>
+        <button class="nav-item active" data-page="dashboard"><i>▦</i> نمای کلی</button>
+        <button class="nav-item" data-page="accounts"><i>▣</i> حساب‌ها و دارایی‌ها</button>
+        <button class="nav-item" data-page="transactions"><i>⇄</i> تراکنش‌ها</button>
+        <button class="nav-item" data-page="trading"><i>⌁</i> معاملات</button>
+      </nav>
+      <div class="sidebar-bottom"><div class="secure-box"><span>✦</span><div><b>فضای خصوصی شما</b><small>داده‌ها با حساب شما محافظت می‌شوند</small></div></div><button id="logoutBtn" class="logout">↪ خروج از حساب</button></div>
+    </aside>
+
+    <section class="main-area">
+      <header class="topbar">
+        <div><p class="eyebrow">MY FINANCIAL WORKSPACE</p><h2 id="pageTitle">نمای کلی</h2></div>
+        <div class="top-actions"><span class="live-pill"><i></i> بازار آنلاین</span><button id="refreshMarket" class="icon-btn" title="به‌روزرسانی قیمت‌ها">↻</button><div class="date-chip" id="todayDate"></div></div>
+      </header>
+
+      <section id="dashboardPage" class="page">
+        <div class="welcome-row"><div><h3>خوش آمدی 👋</h3><p class="muted">وضعیت سرمایه و بازار را در یک نگاه بررسی کن.</p></div><button class="primary-btn" data-open="transactions">＋ ثبت تراکنش</button></div>
+        <div class="stats-grid">
+          <article class="stat-card glass"><div class="stat-head"><span>مجموع دارایی ثبت‌شده</span><b class="stat-icon green">◈</b></div><strong id="totalBalance">۰</strong><small>تومان · مجموع موجودی حساب‌ها</small></article>
+          <article class="stat-card glass"><div class="stat-head"><span>تعداد حساب‌ها</span><b class="stat-icon blue">▣</b></div><strong id="accountCount">۰</strong><small>حساب و کیف پول فعال</small></article>
+          <article class="stat-card glass"><div class="stat-head"><span>ورودی این ماه</span><b class="stat-icon green">↗</b></div><strong id="incomeTotal">۰</strong><small>تومان · بر اساس تراکنش‌های ثبت‌شده</small></article>
+          <article class="stat-card glass"><div class="stat-head"><span>خروجی این ماه</span><b class="stat-icon red">↘</b></div><strong id="expenseTotal">۰</strong><small>تومان · بر اساس تراکنش‌های ثبت‌شده</small></article>
+        </div>
+
+        <div class="market-section">
+          <div class="section-heading"><div><p class="eyebrow">MARKET WATCH</p><h3>نبض بازار</h3></div><span class="muted tiny" id="marketUpdated">در انتظار دریافت قیمت‌ها…</span></div>
+          <div class="market-grid">
+            <article class="market-card glass"><div class="market-top"><span class="coin-icon dollar">$</span><span class="market-label">دلار آزاد</span><span class="market-tag">USD / IRT</span></div><strong id="usdPrice">—</strong><small>تومان</small><div class="market-foot"><span id="usdChange">اطلاعات تغییرات</span><span>●</span></div></article>
+            <article class="market-card glass"><div class="market-top"><span class="coin-icon gold">Au</span><span class="market-label">طلای ۱۸ عیار</span><span class="market-tag">18K / GRAM</span></div><strong id="goldPrice">—</strong><small>تومان / گرم</small><div class="market-foot"><span id="goldChange">اطلاعات تغییرات</span><span>●</span></div></article>
+            <article class="market-card glass"><div class="market-top"><span class="coin-icon btc">₿</span><span class="market-label">بیت‌کوین</span><span class="market-tag">BTC / USD</span></div><strong id="btcPrice">—</strong><small>دلار آمریکا</small><div class="market-foot"><span id="btcChange">اطلاعات تغییرات</span><span>●</span></div></article>
+          </div>
+          <p class="data-disclaimer">قیمت‌ها جنبه اطلاع‌رسانی دارند؛ منبع و زمان به‌روزرسانی را پیش از تصمیم مالی بررسی کن.</p>
+        </div>
+
+        <div class="lower-grid">
+          <article class="panel glass"><div class="section-heading"><div><p class="eyebrow">PORTFOLIO</p><h3>ترکیب حساب‌ها</h3></div><button class="text-btn" data-page="accounts">مشاهده همه</button></div><div class="chart-wrap"><canvas id="portfolioChart"></canvas><div id="chartEmpty" class="chart-empty">برای نمایش نمودار، حساب و موجودی ثبت کن.</div></div></article>
+          <article class="panel glass"><div class="section-heading"><div><p class="eyebrow">RECENT ACTIVITY</p><h3>آخرین تراکنش‌ها</h3></div><button class="text-btn" data-page="transactions">همه تراکنش‌ها</button></div><div id="recentTransactions" class="activity-list"><div class="empty-state">هنوز تراکنشی ثبت نشده است.</div></div></article>
+        </div>
+      </section>
+
+      <section id="accountsPage" class="page hidden">
+        <div class="welcome-row"><div><h3>حساب‌ها و دارایی‌ها</h3><p class="muted">حساب بانکی، کیف پول و صرافی‌هایت را مدیریت کن.</p></div><button class="primary-btn" id="addAccountBtn">＋ افزودن حساب</button></div>
+        <div id="accountsList" class="records-grid"><div class="empty-state">هنوز حسابی اضافه نکرده‌ای.</div></div>
+        <form id="accountForm" class="panel glass form-panel hidden"><h3>حساب جدید</h3><div class="form-grid"><div><label>نام حساب</label><input id="accountName" required placeholder="مثلاً حساب بانک یا صرافی"></div><div><label>نوع حساب</label><select id="accountType"><option>بانکی</option><option>صرافی</option><option>کیف پول</option><option>نقدی</option><option>سایر</option></select></div><div><label>موجودی اولیه (تومان)</label><input id="accountBalance" type="number" min="0" value="0" required></div></div><div class="form-actions"><button class="primary-btn">ذخیره حساب</button><button type="button" class="secondary-btn" id="cancelAccount">انصراف</button></div></form>
+      </section>
+
+      <section id="transactionsPage" class="page hidden">
+        <div class="welcome-row"><div><h3>تراکنش‌ها</h3><p class="muted">ورودی، خروجی و انتقال سرمایه را ثبت کن.</p></div><button class="primary-btn" id="addTransactionBtn">＋ ثبت تراکنش</button></div>
+        <form id="transactionForm" class="panel glass form-panel hidden"><h3>ثبت تراکنش جدید</h3><div class="form-grid"><div><label>نوع تراکنش</label><select id="txType"><option value="income">واریز / درآمد</option><option value="expense">برداشت / هزینه</option></select></div><div><label>حساب</label><select id="txAccount" required></select></div><div><label>مبلغ (تومان)</label><input id="txAmount" type="number" min="1" required></div><div><label>عنوان</label><input id="txTitle" required placeholder="مثلاً واریز سرمایه"></div><div><label>تاریخ</label><input id="txDate" type="date" required></div></div><div class="form-actions"><button class="primary-btn">ثبت تراکنش</button><button type="button" class="secondary-btn" id="cancelTransaction">انصراف</button></div></form>
+        <div class="panel glass table-panel"><div class="section-heading"><h3>تاریخچه تراکنش‌ها</h3><span class="muted tiny" id="txCount">۰ مورد</span></div><div class="table-scroll"><table><thead><tr><th>عنوان</th><th>حساب</th><th>نوع</th><th>تاریخ</th><th>مبلغ</th></tr></thead><tbody id="transactionsTable"><tr><td colspan="5" class="empty-state">تراکنشی وجود ندارد.</td></tr></tbody></table></div></div>
+      </section>
+
+      <section id="tradingPage" class="page hidden">
+        <div class="welcome-row"><div><h3>دفتر معاملات</h3><p class="muted">ثبت و بررسی معاملات لانگ و شورت؛ بخش اولیه در این نسخه.</p></div></div>
+        <div class="panel glass coming-panel"><div class="coming-icon">⌁</div><h3>مدیریت حرفه‌ای معاملات</h3><p class="muted">در مرحله بعد فرم ثبت معامله با نماد، جهت، قیمت ورود و خروج، حجم، اهرم، کارمزد و محاسبه سود و زیان اضافه می‌شود.</p><span class="coming-tag">در حال آماده‌سازی</span></div>
+      </section>
+      <footer>MYCAPITAL <span>•</span> مدیریت هوشمند سرمایه <span class="footer-right">نسخه آغازین</span></footer>
+    </section>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
