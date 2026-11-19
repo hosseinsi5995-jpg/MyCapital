@@ -1,6 +1,6 @@
 // MyCapital - configure Supabase in this file before deployment.
-const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const SUPABASE_URL = "https://wvmlljxybvlqnobkbngd.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_-miuF2fIqvU4CYY_6F4VNg_r5oTLokO";
 const supabaseReady = SUPABASE_URL.startsWith("https://") && !SUPABASE_ANON_KEY.startsWith("YOUR_");
 const db = supabaseReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
