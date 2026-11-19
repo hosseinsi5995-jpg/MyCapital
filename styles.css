@@ -47,3 +47,6 @@
 @keyframes loading-run{0%{transform:translateX(0)}100%{transform:translateX(210%)}}
 @keyframes orbit-rotate{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.intro-splash *{animation-duration:.01ms!important;animation-delay:0ms!important}.intro-splash{transition-duration:.2s}}
+
+/* Futures trade journal */
+.trade-stats{margin:0 0 16px}.trade-note{align-self:end;padding:12px 14px;border:1px solid #39e6a022;background:#10251f66;border-radius:11px;color:#9bb7ad;font-size:10px;line-height:2}.trade-status{display:inline-block;padding:5px 9px;border-radius:20px;font-size:9px;white-space:nowrap}.trade-status.open{background:#62a8ff18;color:var(--blue)}.trade-status.closed{background:#39e6a018;color:var(--green)}.trade-table{min-width:1050px}.trade-table td,.trade-table th{white-space:nowrap}.trade-table td b{direction:ltr;display:inline-block;font-family:Inter,sans-serif}

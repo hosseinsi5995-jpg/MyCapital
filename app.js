@@ -5,7 +5,7 @@ const supabaseReady = SUPABASE_URL.startsWith("https://") && !SUPABASE_ANON_KEY.
 const db = supabaseReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 const $ = (id) => document.getElementById(id);
-let mode = "login", currentUser = null, accounts = [], transactions = [], chart = null, toastTimer;
+let mode = "login", currentUser = null, accounts = [], transactions = [], trades = [], chart = null, toastTimer;
 
 // Show the branded intro on every fresh page load, then reveal the sign-in screen.
 window.addEventListener("load", () => {
@@ -42,12 +42,15 @@ async function showApp(){
  await loadData();await loadMarket();
 }
 async function loadData(){
- const [a,t]=await Promise.all([
+ const [a,t,tr]=await Promise.all([
   db.from("accounts").select("*").order("created_at",{ascending:false}),
-  db.from("transactions").select("*, accounts(name)").order("transaction_date",{ascending:false}).limit(100)
+  db.from("transactions").select("*, accounts(name)").order("transaction_date",{ascending:false}).limit(100),
+  db.from("futures_trades").select("*").order("entry_at",{ascending:false}).limit(300)
  ]);
  if(a.error||t.error){toast("خطا در دریافت اطلاعات؛ SQL راهنما و دسترسی‌ها را بررسی کن.");console.error(a.error,t.error);return}
- accounts=a.data||[];transactions=t.data||[];renderAll();
+ accounts=a.data||[];transactions=t.data||[];trades=tr.data||[];
+ if(tr.error){trades=[];console.warn("Trades table is not ready yet:",tr.error);}
+ renderAll();renderTrades();
 }
 function renderAll(){
  const total=accounts.reduce((s,a)=>s+Number(a.balance||0),0);
@@ -110,6 +113,44 @@ $("transactionForm").addEventListener("submit",async e=>{
  if(update.error){toast("تراکنش ثبت شد اما به‌روزرسانی موجودی حساب خطا داشت.");console.error(update.error)}else toast("تراکنش با موفقیت ثبت شد.");
  e.target.reset();e.target.classList.add("hidden");await loadData();
 });
+// Futures trade journal: all prices and timestamps are entered manually by the user.
+function tradePnl(t){
+ if(t.exit_price===null||t.exit_price===undefined||t.exit_price==="")return null;
+ const diff=t.side==="long"?Number(t.exit_price)-Number(t.entry_price):Number(t.entry_price)-Number(t.exit_price);
+ return diff*Number(t.quantity);
+}
+function compactNumber(value){return new Intl.NumberFormat("en-US",{maximumFractionDigits:8}).format(Number(value)||0)}
+function tradeDate(value){if(!value)return "—";const d=new Date(value);return Number.isNaN(d.getTime())?"—":d.toLocaleString("fa-IR",{dateStyle:"short",timeStyle:"short"})}
+function renderTrades(){
+ const open=trades.filter(t=>t.status==="open");
+ const closed=trades.filter(t=>!open.includes(t));
+ const realized=closed.reduce((sum,t)=>sum+(tradePnl(t)||0),0);
+ $("tradeCount").textContent=toman(trades.length);$("openTradeCount").textContent=toman(open.length);$("closedTradeCount").textContent=toman(closed.length);
+ $("realizedPnl").textContent=compactNumber(realized)+" USDT";$("realizedPnl").style.color=realized>0?"var(--green)":realized<0?"var(--red)":"var(--text)";
+ $("tradeListCount").textContent=toman(trades.length)+" مورد";
+ $("tradesTable").innerHTML=trades.length?trades.map(t=>{
+  const pnl=tradePnl(t),isOpen=pnl===null;
+  return `<tr><td><b>${escapeHtml(t.symbol)}</b></td><td class="${t.side==="long"?"green":"red"}">${t.side==="long"?"LONG":"SHORT"}</td><td>${compactNumber(t.entry_price)}</td><td>${isOpen?"—":compactNumber(t.exit_price)}</td><td>${compactNumber(t.stop_loss)}</td><td>${compactNumber(t.take_profit)}</td><td>${t.leverage}×</td><td>${tradeDate(t.entry_at)}</td><td>${tradeDate(t.exit_at)}</td><td><span class="trade-status ${isOpen?"open":"closed"}">${isOpen?"باز":"بسته"}</span></td><td class="${pnl>0?"green":pnl<0?"red":""}">${isOpen?"—":compactNumber(pnl)+" USDT"}</td></tr>`;
+ }).join(""):'<tr><td colspan="11" class="empty-state">هنوز معامله‌ای ثبت نشده است.</td></tr>';
+}
+$("addTradeBtn").onclick=()=>{$("tradeForm").classList.remove("hidden");if(!$ ("tradeEntryTime").value)$ ("tradeEntryTime").value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16)};
+$("cancelTradeBtn").onclick=()=>{$("tradeForm").classList.add("hidden");$("tradeForm").reset();$("tradeLeverage").value="1"};
+$("tradeForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(!db||!currentUser){toast("ابتدا وارد حساب کاربری شو.");return}
+ const exitRaw=$("tradeExit").value.trim(),exitTimeRaw=$("tradeExitTime").value.trim();
+ if(Boolean(exitRaw)!==Boolean(exitTimeRaw)){toast("برای بستن معامله، هم قیمت خروج و هم زمان خروج را وارد کن.");return}
+ const entry=Number($("tradeEntry").value),stop=Number($("tradeStop").value),target=Number($("tradeTarget").value),side=$("tradeSide").value;
+ if((side==="long"&&(stop>=entry||target<=entry))||(side==="short"&&(stop<=entry||target>=entry))){toast("حد ضرر و تارگت با جهت معامله هم‌خوانی ندارند.");return}
+ const payload={user_id:currentUser.id,symbol:$("tradeSymbol").value.trim().toUpperCase(),side,entry_price:entry,exit_price:exitRaw?Number(exitRaw):null,stop_loss:stop,take_profit:target,quantity:Number($("tradeQty").value),leverage:Number($("tradeLeverage").value),entry_at:new Date($("tradeEntryTime").value).toISOString(),exit_at:exitTimeRaw?new Date($("tradeExitTime").value).toISOString():null,status:exitRaw?"closed":"open"};
+ if(payload.exit_price!==null&&payload.exit_price<=0){toast("قیمت خروج باید بیشتر از صفر باشد.");return}
+ if(payload.exit_at&&new Date(payload.exit_at)<new Date(payload.entry_at)){toast("زمان خروج نمی‌تواند قبل از زمان ورود باشد.");return}
+ const btn=$("saveTradeBtn");btn.disabled=true;
+ const {error}=await db.from("futures_trades").insert(payload);btn.disabled=false;
+ if(error){toast("ذخیره معامله ناموفق بود؛ مطمئن شو SQL بخش معاملات را در Supabase اجرا کرده‌ای.");console.error(error);return}
+ e.target.reset();$("tradeLeverage").value="1";e.target.classList.add("hidden");toast("معامله با موفقیت ذخیره شد.");await loadData();
+});
+
 $("logoutBtn").onclick=async()=>{if(db)await db.auth.signOut();currentUser=null;$("appView").classList.add("hidden");$("authView").classList.remove("hidden")};
 
 (async()=>{if(!db){$("authMessage").textContent="برای فعال‌سازی ورود و ذخیره آنلاین، تنظیمات Supabase را طبق README وارد کن.";return}const {data}=await db.auth.getSession();if(data.session){currentUser=data.session.user;await showApp()}})();

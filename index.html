@@ -113,8 +113,31 @@
       </section>
 
       <section id="tradingPage" class="page hidden">
-        <div class="welcome-row"><div><h3>دفتر معاملات</h3><p class="muted">ثبت و بررسی معاملات لانگ و شورت؛ بخش اولیه در این نسخه.</p></div></div>
-        <div class="panel glass coming-panel"><div class="coming-icon">⌁</div><h3>مدیریت حرفه‌ای معاملات</h3><p class="muted">در مرحله بعد فرم ثبت معامله با نماد، جهت، قیمت ورود و خروج، حجم، اهرم، کارمزد و محاسبه سود و زیان اضافه می‌شود.</p><span class="coming-tag">در حال آماده‌سازی</span></div>
+        <div class="welcome-row"><div><h3>مدیریت معاملات فیوچرز</h3><p class="muted">ثبت دستی معاملات ارز دیجیتال، حد ضرر، تارگت و بررسی سود و زیان.</p></div><button class="primary-btn" id="addTradeBtn">＋ ثبت معامله</button></div>
+        <div class="stats-grid trade-stats">
+          <article class="stat-card glass"><div class="stat-head"><span>کل معاملات</span><b class="stat-icon blue">⌁</b></div><strong id="tradeCount">۰</strong><small>معاملات ثبت‌شده</small></article>
+          <article class="stat-card glass"><div class="stat-head"><span>معاملات باز</span><b class="stat-icon blue">◷</b></div><strong id="openTradeCount">۰</strong><small>در حال اجرا</small></article>
+          <article class="stat-card glass"><div class="stat-head"><span>معاملات بسته</span><b class="stat-icon green">✓</b></div><strong id="closedTradeCount">۰</strong><small>دارای قیمت خروج</small></article>
+          <article class="stat-card glass"><div class="stat-head"><span>سود / زیان تحقق‌یافته</span><b class="stat-icon green">↗</b></div><strong id="realizedPnl">۰</strong><small>بر اساس قیمت‌های ثبت‌شده · USDT</small></article>
+        </div>
+        <form id="tradeForm" class="panel glass form-panel hidden">
+          <h3>ثبت معامله فیوچرز</h3>
+          <div class="form-grid">
+            <div><label for="tradeSymbol">نماد ارز دیجیتال</label><input id="tradeSymbol" required maxlength="20" placeholder="مثلاً BTCUSDT"></div>
+            <div><label for="tradeSide">جهت معامله</label><select id="tradeSide"><option value="long">Long (خرید)</option><option value="short">Short (فروش)</option></select></div>
+            <div><label for="tradeEntry">قیمت ورود (USDT)</label><input id="tradeEntry" type="number" min="0.00000001" step="any" required placeholder="مثلاً 67500"></div>
+            <div><label for="tradeExit">قیمت خروج (USDT)</label><input id="tradeExit" type="number" min="0.00000001" step="any" placeholder="برای معامله باز خالی بگذار"></div>
+            <div><label for="tradeStop">حد ضرر (Stop Loss)</label><input id="tradeStop" type="number" min="0.00000001" step="any" required placeholder="قیمت حد ضرر"></div>
+            <div><label for="tradeTarget">تارگت سود (Take Profit)</label><input id="tradeTarget" type="number" min="0.00000001" step="any" required placeholder="قیمت هدف"></div>
+            <div><label for="tradeQty">حجم معامله (تعداد کوین)</label><input id="tradeQty" type="number" min="0.00000001" step="any" required placeholder="مثلاً 0.01"></div>
+            <div><label for="tradeLeverage">اهرم (Leverage)</label><input id="tradeLeverage" type="number" min="1" max="200" step="1" value="1" required></div>
+            <div><label for="tradeEntryTime">زمان ورود</label><input id="tradeEntryTime" type="datetime-local" required></div>
+            <div><label for="tradeExitTime">زمان خروج</label><input id="tradeExitTime" type="datetime-local"></div>
+            <div class="trade-note">اگر قیمت و زمان خروج را خالی بگذاری، معامله به‌عنوان «باز» ذخیره می‌شود. مقدار حجم، تعداد خودِ کوین است؛ مثلاً 0.01 BTC.</div>
+          </div>
+          <div class="form-actions"><button class="primary-btn" id="saveTradeBtn">ذخیره معامله</button><button type="button" class="secondary-btn" id="cancelTradeBtn">انصراف</button></div>
+        </form>
+        <div class="panel glass table-panel"><div class="section-heading"><h3>تاریخچه معاملات</h3><span class="muted tiny" id="tradeListCount">۰ مورد</span></div><div class="table-scroll"><table class="trade-table"><thead><tr><th>نماد</th><th>جهت</th><th>ورود</th><th>خروج</th><th>حد ضرر</th><th>تارگت</th><th>اهرم</th><th>زمان ورود</th><th>زمان خروج</th><th>وضعیت</th><th>سود / زیان</th></tr></thead><tbody id="tradesTable"><tr><td colspan="11" class="empty-state">هنوز معامله‌ای ثبت نشده است.</td></tr></tbody></table></div></div>
       </section>
       <footer>MYCAPITAL <span>•</span> مدیریت هوشمند سرمایه <span class="footer-right">نسخه آغازین</span></footer>
     </section>
